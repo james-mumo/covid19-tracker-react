@@ -1,10 +1,9 @@
-
 import React, { useEffect, useState } from "react";
-import "./App.css";
 import { FormControl, Select, MenuItem } from "@mui/material";
 const Header = () => {
   const [countries, setCountries] = useState([""]);
-  const [selectedCountry, setSelectedCountry] = useState("Worldwide");
+  const [selectedCountry, setSelectedCountry] = useState("worldwide");
+  const [countryInfo, setCountryInfo] = useState({});
 
   useEffect(() => {
     const getCountriesData = async () => {
@@ -26,23 +25,35 @@ const Header = () => {
   const onCountryChange = async (event) => {
     const countryCode = event.target.value;
     setSelectedCountry(countryCode);
+
+    const url =
+      countryCode === "worldwide"
+        ? "https://disease.sh/v3/covid-19/countries"
+        : `https://disease.sh/v3/covid-19/countries/${countryCode}`;
+
+    await fetch(url)
+      .then((res) => res.json())
+      .then((data) => {
+        setSelectedCountry(countryCode);
+        setCountryInfo(data);
+      });
   };
   return (
     <div className="app__header flex flex-row justify-between align-middle">
       <h1>The tracker</h1>
       <FormControl>
-        <Select
+        <select
           variant="outlined"
           onChange={onCountryChange}
           value={selectedCountry}
         >
-          <MenuItem value="Worldwide">Worldwide</MenuItem>
+          <option value="Worldwide">Worldwide</option>
           {countries.map((country, id) => (
-            <MenuItem key={id} value={country.value}>
+            <option key={id} value={country.value}>
               {country.name}
-            </MenuItem>
+            </option>
           ))}
-        </Select>
+        </select>
       </FormControl>
     </div>
   );
